@@ -1,24 +1,36 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getJson, getRes } from "./lib/fetch";
+
 export type LoginCredentials = {
   username: string;
   password: string;
 };
 
-export const useLogin = async (values: LoginCredentials) => {
-  const response = await fetch("/api/auth/login", {
-    body: JSON.stringify(values),
-    method: "POST",
-  });
-  const resp = await response.json();
-
-  console.log(resp);
+export type UserInfo = {
+  id: number;
+  username: string;
 };
 
-export const useLogout = async () => {
-  const response = await fetch("/api/auth/logout", {
-    body: null,
-    method: "POST",
-  });
-  const resp = await response.json();
+export const useLogin = () => {
+  const qc = useQueryClient();
 
-  console.log(resp);
+  return useMutation({
+    mutationFn: (credentials: LoginCredentials) => getJson("/api/auth/login", "POST", credentials),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth"] }),
+  });
+};
+
+export const useLogout = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => getRes("/api/auth/logout", "POST"),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth"] }),
+  });
+};
+
+export const useMe = () => {
+  return useQuery({
+    queryKey: ["auth", "me"],
+    queryFn: () => getJson("/api/auth/me"),
+  });
 };
