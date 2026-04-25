@@ -14,6 +14,11 @@ export const fetchWithError = async (input: RequestInfo | URL, init?: RequestIni
     return res;
   }
 
+  if (res.status === 400) {
+    let e = await res.json();
+    throw e;
+  }
+
   if (res.status === 401) {
     throw { error: "Unauthorized" };
   }

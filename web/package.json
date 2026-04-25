@@ -13,6 +13,7 @@
     "fmt": "oxfmt"
   },
   "dependencies": {
+    "@ant-design/icons": "~6.1.1",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-devtools": "latest",
     "@tanstack/react-query": "^5.99.2",

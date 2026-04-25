@@ -47,6 +47,9 @@ importers:
 
   web:
     dependencies:
+      '@ant-design/icons':
+        specifier: ~6.1.1
+        version: 6.1.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.2.2(vite@8.0.8(@types/node@22.19.17)(esbuild@0.27.7)(jiti@2.6.1)(tsx@4.21.0))

@@ -21,11 +21,11 @@ authApp.post("/login", async (c) => {
       .select({ password: usersTable.passwordHash })
       .from(usersTable)
       .where(eq(usersTable.username, body.username));
+    if (passwordHash.length === 0) {
+      return new Response(JSON.stringify({ error: "userName" }), { status: 400 });
+    }
 
-    if (
-      passwordHash.length !== 0 &&
-      (await argon2.verify(passwordHash[0].password, body.password))
-    ) {
+    if (await argon2.verify(passwordHash[0].password, body.password)) {
       const userId = await db
         .select({ userId: usersTable.id })
         .from(usersTable)
@@ -35,7 +35,7 @@ authApp.post("/login", async (c) => {
       c.header("Set-Cookie", newCookie);
 
       return c.json({ userId: id, username: body.username });
-    } else return new Response(null, { status: 400 });
+    } else return new Response(JSON.stringify({ error: "password" }), { status: 400 });
   }
 });
 
@@ -46,7 +46,6 @@ authApp.post("/logout", async (c) => {
 
 authApp.get("/me", async (c) => {
   const info = c.get("user");
-  console.log(info);
   return c.json(info);
 });
 

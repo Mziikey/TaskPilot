@@ -24,13 +24,14 @@ export const useLogout = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => getRes("/api/auth/logout", "POST"),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth", "me"] }),
   });
 };
 
 export const useMe = () => {
-  return useQuery({
+  return useQuery<LoginCredentials>({
     queryKey: ["auth", "me"],
     queryFn: () => getJson("/api/auth/me"),
+    retry: 1,
   });
 };
