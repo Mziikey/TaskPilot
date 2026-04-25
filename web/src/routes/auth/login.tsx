@@ -1,16 +1,16 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { FormProps } from "antd";
 import { Button, Form, Input, message } from "antd";
 import { useLogin, type LoginCredentials } from "#/api/auth";
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute("/auth/login")({
   component: Login,
 });
 
 function Login() {
   const { mutateAsync: login } = useLogin();
   const [form] = Form.useForm();
-  const navigate = useNavigate({ from: "/login" });
+  const navigate = useNavigate({ from: "/auth/login" });
 
   const onFinish: FormProps<LoginCredentials>["onFinish"] = async (values: LoginCredentials) => {
     try {
@@ -67,9 +67,11 @@ function Login() {
           <Form.Item label={null}>
             <div className="flex justify-between">
               <Button type="primary" htmlType="submit">
-                Login
+                Sign In
               </Button>
-              <Button htmlType="button">注册新用户</Button>
+              <Link to="/auth/register">
+                <Button htmlType="button">Sign Up</Button>
+              </Link>
             </div>
           </Form.Item>
         </Form>

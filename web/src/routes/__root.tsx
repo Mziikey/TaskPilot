@@ -12,9 +12,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import "../styles.css";
 import { ListTodo } from "lucide-react";
-import { useMe } from "#/api/auth";
 import { UseMe } from "#/components/useMe";
-import { Logout } from "#/components/useLogout";
 
 const queryClient = new QueryClient();
 
@@ -54,7 +52,7 @@ const items: MenuItem[] = [
 function RootComponent() {
   const [collapsed, setCollapsed] = useState(false);
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken();
 
   const currentYear = new Date().getFullYear();
@@ -79,10 +77,7 @@ function RootComponent() {
           <Header style={{ padding: 0, background: colorBgContainer }}>
             <div className="flex justify-between pr-4 items-center">
               <h1 className="text-2xl font-semibold m-4">Dashboard</h1>
-              <div className="flex justify-center items-center gap-3">
-                <Logout />
-                <UseMe />
-              </div>
+              <UseMe />
             </div>
           </Header>
 

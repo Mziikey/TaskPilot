@@ -15,6 +15,13 @@
       "when": 1776650315171,
       "tag": "0001_wild_senator_kelly",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777104277982,
+      "tag": "0002_orange_squadron_sinister",
+      "breakpoints": true
     }
   ]
 }

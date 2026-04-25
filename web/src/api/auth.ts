@@ -11,12 +11,30 @@ export type UserInfo = {
   username: string;
 };
 
+export type RegisterInfo = {
+  username: string;
+  nickname: string;
+  password: string;
+};
+
 export const useLogin = () => {
   const qc = useQueryClient();
 
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => getJson("/api/auth/login", "POST", credentials),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["auth"] }),
+  });
+};
+
+export const useRegister = () => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: (register: RegisterInfo) => {
+      console.log(register);
+      return getJson("/api/auth/register", "POST", register);
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth", "me"] }),
   });
 };
 
@@ -32,6 +50,6 @@ export const useMe = () => {
   return useQuery<LoginCredentials>({
     queryKey: ["auth", "me"],
     queryFn: () => getJson("/api/auth/me"),
-    retry: 1,
+    retry: 2,
   });
 };

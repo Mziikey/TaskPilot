@@ -1,22 +1,29 @@
 import { useMe } from "#/api/auth";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "antd";
+import { Logout } from "./useLogout";
 
 export const UseMe = () => {
-  const navigate = useNavigate({ from: "/" });
+  const location = useLocation();
+  const navigate = useNavigate();
   const { isPending, isError, data } = useMe();
-  if (isPending)
+  if (isError && location.pathname === "/") {
+    navigate({ to: "/auth/login" });
+    return null;
+  }
+  if (isPending || isError)
     return (
       <div>
-        <Link to="/login">
-          <Button>Login</Button>
+        <Link to="/auth/login">
+          <Button>Sign In</Button>
         </Link>
       </div>
     );
-  if (isError) {
-    navigate({ to: "/login" });
-    return null;
-  }
 
-  return <div className="text-lg font-light">{data.username}</div>;
+  return (
+    <div className="flex justify-center items-center gap-3">
+      <Logout />
+      <div className="text-lg font-light">{data.username}</div>
+    </div>
+  );
 };

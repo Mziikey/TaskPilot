@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { tasksTable } from "../db/schema.js";
+import { tasksTable } from "../db/schema/task.js";
 import { eq } from "drizzle-orm";
 import type { dbType } from "../index.js";
 
