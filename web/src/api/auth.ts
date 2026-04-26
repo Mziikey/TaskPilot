@@ -50,6 +50,6 @@ export const useMe = () => {
   return useQuery<LoginCredentials>({
     queryKey: ["auth", "me"],
     queryFn: () => getJson("/api/auth/me"),
-    retry: 2,
+    retry: 1,
   });
 };

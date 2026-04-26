@@ -2,21 +2,21 @@ import { useRegister, type RegisterInfo } from "#/api/auth";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Form, Input, message, type FormProps } from "antd";
 
-export const Route = createFileRoute("/auth/register")({
+export const Route = createFileRoute("/_auth/register")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const { mutateAsync: register } = useRegister();
   const [form] = Form.useForm();
-  const navigate = useNavigate({ from: "/auth/register" });
+  const navigate = useNavigate({ from: "/register" });
 
   const onFinish: FormProps<RegisterInfo>["onFinish"] = async (values: RegisterInfo) => {
     try {
       await register(values, {
         onSuccess: () => {
           message.success("注册成功", 1);
-          setTimeout(() => navigate({ to: "/auth/login" }), 5000);
+          setTimeout(() => navigate({ to: "/login" }), 5000);
         },
       });
     } catch (e: any) {
@@ -31,7 +31,7 @@ function RouteComponent() {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center m-4">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="w-96 bg-white p-8 rounded-lg shadow-lg">
         <Form
           form={form}

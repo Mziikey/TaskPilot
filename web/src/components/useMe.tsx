@@ -8,13 +8,13 @@ export const UseMe = () => {
   const navigate = useNavigate();
   const { isPending, isError, data } = useMe();
   if (isError && location.pathname === "/") {
-    navigate({ to: "/auth/login" });
+    navigate({ to: "/login" });
     return null;
   }
   if (isPending || isError)
     return (
       <div>
-        <Link to="/auth/login">
+        <Link to="/login">
           <Button>Sign In</Button>
         </Link>
       </div>
