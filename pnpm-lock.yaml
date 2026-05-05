@@ -28,6 +28,9 @@ importers:
       hono:
         specifier: ^4.12.14
         version: 4.12.14
+      openai:
+        specifier: ^6.35.0
+        version: 6.35.0(ws@8.20.0)(zod@3.25.76)
     devDependencies:
       '@types/node':
         specifier: ^20.11.17
@@ -71,9 +74,15 @@ importers:
       antd:
         specifier: ^6.3.6
         version: 6.3.6(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      dayjs:
+        specifier: ^1.11.20
+        version: 1.11.20
       lucide-react:
         specifier: ^0.545.0
         version: 0.545.0(react@19.2.5)
+      openai:
+        specifier: ^6.35.0
+        version: 6.35.0(ws@8.20.0)(zod@3.25.76)
       react:
         specifier: ^19.2.0
         version: 19.2.5
@@ -2436,6 +2445,18 @@ packages:
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
     engines: {node: '>=0.10.0'}
+
+  openai@6.35.0:
+    resolution: {integrity: sha512-L/skwIGnt5xQZHb0UfTu9uAUKbis3ehKypOuJKi20QvG7UStV6C8IC3myGYHcdiF4kms/bAvOJ9UqqNWqi8x/Q==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
 
   oxfmt@0.45.0:
     resolution: {integrity: sha512-0o/COoN9fY50bjVeM7PQsNgbhndKurBIeTIcspW033OumksjJJmIVDKjAk5HMwU/GHTxSOdGDdhJ6BRzGPmsHg==}
@@ -4919,6 +4940,11 @@ snapshots:
   node-releases@2.0.37: {}
 
   normalize-path@3.0.0: {}
+
+  openai@6.35.0(ws@8.20.0)(zod@3.25.76):
+    optionalDependencies:
+      ws: 8.20.0
+      zod: 3.25.76
 
   oxfmt@0.45.0:
     dependencies:

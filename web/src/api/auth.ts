@@ -22,7 +22,7 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => getJson("/api/auth/login", "POST", credentials),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth"] }),
+    onSuccess: () => qc.resetQueries({ queryKey: ["auth"] }),
   });
 };
 
@@ -40,9 +40,10 @@ export const useRegister = () => {
 
 export const useLogout = () => {
   const qc = useQueryClient();
+
   return useMutation({
     mutationFn: () => getRes("/api/auth/logout", "POST"),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["auth", "me"] }),
+    onSuccess: qc.clear,
   });
 };
 

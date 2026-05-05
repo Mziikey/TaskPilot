@@ -16,8 +16,8 @@ function Login() {
     try {
       await login(values, {
         onSuccess: () => {
-          message.success("登陆成功", 1);
-          setTimeout(() => navigate({ to: "/" }), 1000);
+          message.success("登陆成功", 2);
+          setTimeout(() => navigate({ to: "/" }), 2000);
         },
       });
     } catch (e: any) {

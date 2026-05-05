@@ -14,7 +14,11 @@ import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AppScheduleRouteImport } from './routes/_app/schedule'
 import { Route as AppNewRouteImport } from './routes/_app/new'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppAllRouteImport } from './routes/_app/all'
+import { Route as AppAiRouteImport } from './routes/_app/ai'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/_auth',
@@ -39,21 +43,49 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const AppScheduleRoute = AppScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppNewRoute = AppNewRouteImport.update({
   id: '/new',
   path: '/new',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAllRoute = AppAllRouteImport.update({
+  id: '/all',
+  path: '/all',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAiRoute = AppAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/ai': typeof AppAiRoute
+  '/all': typeof AppAllRoute
+  '/dashboard': typeof AppDashboardRoute
   '/new': typeof AppNewRoute
+  '/schedule': typeof AppScheduleRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
 }
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
+  '/ai': typeof AppAiRoute
+  '/all': typeof AppAllRoute
+  '/dashboard': typeof AppDashboardRoute
   '/new': typeof AppNewRoute
+  '/schedule': typeof AppScheduleRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
 }
@@ -61,21 +93,45 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
   '/_auth': typeof AuthRouteRouteWithChildren
+  '/_app/ai': typeof AppAiRoute
+  '/_app/all': typeof AppAllRoute
+  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/new': typeof AppNewRoute
+  '/_app/schedule': typeof AppScheduleRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/new' | '/login' | '/register'
+  fullPaths:
+    | '/'
+    | '/ai'
+    | '/all'
+    | '/dashboard'
+    | '/new'
+    | '/schedule'
+    | '/login'
+    | '/register'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/new' | '/login' | '/register'
+  to:
+    | '/'
+    | '/ai'
+    | '/all'
+    | '/dashboard'
+    | '/new'
+    | '/schedule'
+    | '/login'
+    | '/register'
   id:
     | '__root__'
     | '/_app'
     | '/_auth'
+    | '/_app/ai'
+    | '/_app/all'
+    | '/_app/dashboard'
     | '/_app/new'
+    | '/_app/schedule'
     | '/_auth/login'
     | '/_auth/register'
     | '/_app/'
@@ -123,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRouteRoute
     }
+    '/_app/schedule': {
+      id: '/_app/schedule'
+      path: '/schedule'
+      fullPath: '/schedule'
+      preLoaderRoute: typeof AppScheduleRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/new': {
       id: '/_app/new'
       path: '/new'
@@ -130,16 +193,45 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNewRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/all': {
+      id: '/_app/all'
+      path: '/all'
+      fullPath: '/all'
+      preLoaderRoute: typeof AppAllRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/ai': {
+      id: '/_app/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AppAiRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
 interface AppRouteRouteChildren {
+  AppAiRoute: typeof AppAiRoute
+  AppAllRoute: typeof AppAllRoute
+  AppDashboardRoute: typeof AppDashboardRoute
   AppNewRoute: typeof AppNewRoute
+  AppScheduleRoute: typeof AppScheduleRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppAiRoute: AppAiRoute,
+  AppAllRoute: AppAllRoute,
+  AppDashboardRoute: AppDashboardRoute,
   AppNewRoute: AppNewRoute,
+  AppScheduleRoute: AppScheduleRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

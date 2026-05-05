@@ -9,7 +9,6 @@ import { Outlet } from "@tanstack/react-router";
 function AuthIndexPage() {
   return (
     <div>
-      <p>fdj</p>
       <Outlet />
     </div>
   );

@@ -15,8 +15,8 @@ function RouteComponent() {
     try {
       await register(values, {
         onSuccess: () => {
-          message.success("注册成功", 1);
-          setTimeout(() => navigate({ to: "/login" }), 5000);
+          message.success("注册成功", 2);
+          setTimeout(() => navigate({ to: "/login" }), 3000);
         },
       });
     } catch (e: any) {

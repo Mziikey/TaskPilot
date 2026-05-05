@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson } from "./lib/fetch";
 
-export type AddTaskType = {
+export type SubmitTaskType = {
   title: string;
   description?: string;
   status: "todo" | "doing" | "done";
@@ -11,6 +11,7 @@ export type AddTaskType = {
 };
 
 export type TaskType = {
+  id: number;
   title: string;
   description?: string;
   status: "todo" | "doing" | "done";
@@ -32,7 +33,25 @@ export const useAddTask = () => {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (values: AddTaskType) => getJson("/api/tasks/add", "POST", values),
+    mutationFn: (values: SubmitTaskType) => getJson("/api/tasks/add", "POST", values),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+};
+
+export const useEditTask = (taskId: number) => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: (values: SubmitTaskType) => getJson(`/api/tasks/edit/${taskId}`, "POST", values),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+};
+
+export const useDeleteTask = (taskId: number) => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => getJson(`/api/tasks/delete/${taskId}`, "DELETE"),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
   });
 };

@@ -1,17 +1,24 @@
 import { useMe } from "#/api/auth";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { Button } from "antd";
-import { Logout } from "./useLogout";
+import { Logout } from "./Logout";
 
-export const UseMe = () => {
+export const Me = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isPending, isError, data } = useMe();
+
   if (isError && location.pathname === "/") {
+    console.log("no login");
     navigate({ to: "/login" });
     return null;
   }
-  if (isPending || isError)
+
+  if (isPending) {
+    return <p>loading...</p>;
+  }
+
+  if (isError)
     return (
       <div>
         <Link to="/login">

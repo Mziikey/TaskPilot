@@ -42,4 +42,37 @@ tasksApp.post("/add", async (c) => {
   return c.json({ task: body.title });
 });
 
+tasksApp.delete("/delete/:id", async (c) => {
+  const db = c.get("db");
+  const taskId = c.req.param("id");
+  const userId = c.get("user")?.id;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+  await db.delete(tasksTable).where(eq(tasksTable.id, Number(taskId)));
+  return c.json({ taskId: taskId });
+});
+
+tasksApp.post("/edit/:id", async (c) => {
+  const db = c.get("db");
+  const taskId = c.req.param("id");
+  const userId = c.get("user")?.id;
+  const body: TaskInfo = await c.req.json();
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+  await db
+    .update(tasksTable)
+    .set({
+      title: body.title,
+      description: body.description,
+      status: body.status,
+      priority: body.priority,
+      startAt: body.startAt,
+      dueAt: body.dueAt,
+    })
+    .where(eq(tasksTable.id, Number(taskId)));
+  return c.json({ task: body.title, taskId: taskId });
+});
+
 export default tasksApp;
