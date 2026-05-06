@@ -8,7 +8,7 @@ import authApp from "./routes/auth.js";
 import tasksApp from "./routes/task.js";
 import aiApp from "./routes/ai.js";
 import { createMiddleware } from "hono/factory";
-import { streamSSE } from "hono/streaming";
+import { streamSSE, streamText } from "hono/streaming";
 import chatApp from "./routes/chat.js";
 
 const db = drizzle(process.env.DB_FILE_NAME!);
@@ -33,12 +33,9 @@ app.route("/chat", chatApp);
 
 app.get("/sse", (c) => {
   const text = "Hello world";
-  return streamSSE(c, async (stream) => {
+  return streamText(c, async (stream) => {
     for (let i = 0; i < text.length; i++) {
-      await stream.writeSSE({
-        event: "my_counter",
-        data: `${text.slice(0, i + 1)}`,
-      });
+      await stream.writeln(text.slice(0, i + 1));
       await stream.sleep(300);
     }
   });

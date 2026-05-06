@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import type { UserInfo } from "./auth.js";
 import type { dbType } from "../index.js";
 import { eq } from "drizzle-orm";
-import { streamSSE } from "hono/streaming";
+import { streamSSE, streamText } from "hono/streaming";
 import { messagesTable, sessionsTable } from "../db/schema/chat.js";
 
 const chatApp = new Hono<{ Variables: { user: UserInfo | undefined; db: dbType } }>();
@@ -90,12 +90,26 @@ chatApp.post("/sessions/:sessionId/messages", async (c) => {
   return c.json({ message });
 });
 
-chatApp.post("sessions/:sessionId/stream", async (c) => {});
+chatApp.post("sessions/:sessionId/stream", async (c) => {
+  const db = c.get("db");
+  const userId = c.get("user")?.id;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
 
-chatApp.get("/", async (c) => {
+  const body: { role: "user" | "assistant"; content: string } = await c.req.json();
+  const sessionId = Number(c.req.param("sessionId"));
+
+  const newMessage: MessagesType = {
+    sessionId: sessionId,
+    role: body.role,
+    content: body.content,
+    createdAt: Date.now(),
+  };
+
+  const [userMessage] = await db.insert(messagesTable).values(newMessage).returning();
+
   try {
-    console.log("start");
-    console.log(process.env.DASHSCOPE_API_KEY);
     const openai = new OpenAI({
       apiKey: process.env.DASHSCOPE_API_KEY,
       baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
@@ -110,25 +124,36 @@ chatApp.get("/", async (c) => {
         },
         {
           role: "user",
-          content: "请介绍一下自己",
+          content: newMessage.content,
         },
       ],
       stream: true,
       stream_options: { include_usage: true },
     });
 
-    let reply = "";
+    let aiReply = "";
 
-    return streamSSE(c, async (s) => {
+    const replyMessage: MessagesType = {
+      sessionId: sessionId,
+      role: "assistant",
+      content: aiReply,
+      createdAt: Date.now(),
+    };
+
+    const [aiReplyInfo] = await db.insert(messagesTable).values(replyMessage).returning();
+
+    return streamText(c, async (s) => {
+      s.writeln(JSON.stringify({ type: "info", userMessage, aiReplyInfo }));
       for await (const event of stream) {
         if (event.choices && event.choices.length > 0 && event.choices[0].delta.content) {
-          reply = reply + event.choices[0].delta.content;
-          await s.writeSSE({
-            data: reply,
-            event: "ai-reply",
-          });
+          aiReply = aiReply + event.choices[0].delta.content;
+          await s.writeln(JSON.stringify({ type: "reply", reply: aiReply }));
         }
       }
+      await db
+        .update(messagesTable)
+        .set({ content: aiReply })
+        .where(eq(messagesTable.id, aiReplyInfo.id));
     });
   } catch (e) {
     console.log(`错误信息：${e}`);

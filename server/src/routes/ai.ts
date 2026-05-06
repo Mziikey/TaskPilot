@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import OpenAI from "openai";
 import type { UserInfo } from "./auth.js";
 import type { dbType } from "../index.js";
-import { streamSSE } from "hono/streaming";
+import { streamSSE, streamText } from "hono/streaming";
 
 const aiApp = new Hono<{ Variables: { user: UserInfo | undefined; db: dbType } }>();
 
@@ -33,14 +33,11 @@ aiApp.get("/", async (c) => {
 
     let reply = "";
 
-    return streamSSE(c, async (s) => {
+    return streamText(c, async (s) => {
       for await (const event of stream) {
         if (event.choices && event.choices.length > 0 && event.choices[0].delta.content) {
           reply = reply + event.choices[0].delta.content;
-          await s.writeSSE({
-            data: reply,
-            event: "ai-reply",
-          });
+          await s.writeln(reply);
         }
       }
     });

@@ -43,7 +43,7 @@ const items: MenuItem[] = [
   getItem(<Link to="/all">my tasks</Link>, "2", <CheckSquareOutlined />),
   getItem(<Link to="/new">new task</Link>, "3", <DesktopOutlined />),
   getItem(<Link to="/schedule">my schedule</Link>, "4", <FieldTimeOutlined />),
-  getItem(<Link to="/ai">ai</Link>, "5", <FieldTimeOutlined />),
+  getItem(<Link to="/chat">chat</Link>, "5", <FieldTimeOutlined />),
   getItem("User", "sub1", <UserOutlined />, [getItem("Bill", "6"), getItem("Alex", "7")]),
   getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "8"), getItem("Team 2", "9")]),
 ];
@@ -83,9 +83,6 @@ function RouteComponent() {
         <Content className="flex flex-1">
           <Outlet />
         </Content>
-        <Footer style={{ textAlign: "center" }}>
-          Ant Design ©{currentYear} Created by Ant UED
-        </Footer>
       </Layout>
     </Layout>
   );
