@@ -5,6 +5,7 @@ import type { dbType } from "../index.js";
 import { eq } from "drizzle-orm";
 import { streamSSE, streamText } from "hono/streaming";
 import { messagesTable, sessionsTable } from "../db/schema/chat.js";
+import { error } from "console";
 
 const chatApp = new Hono<{ Variables: { user: UserInfo | undefined; db: dbType } }>();
 
@@ -50,7 +51,7 @@ chatApp.post("/sessions", async (c) => {
 
   const [session] = await db.insert(sessionsTable).values(newSession).returning();
 
-  return c.json({ session });
+  return c.json(session);
 });
 
 chatApp.get("/sessions/:sessionId/messages", async (c) => {
@@ -68,26 +69,41 @@ chatApp.get("/sessions/:sessionId/messages", async (c) => {
   return c.json(messages);
 });
 
-chatApp.post("/sessions/:sessionId/messages", async (c) => {
+chatApp.delete("/sessions/:sessionId", async (c) => {
   const db = c.get("db");
   const userId = c.get("user")?.id;
   if (!userId) {
     return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
   }
-
-  const body: { role: "user" | "assistant"; content: string } = await c.req.json();
   const sessionId = Number(c.req.param("sessionId"));
 
-  const newMessage: MessagesType = {
-    sessionId: sessionId,
-    role: body.role,
-    content: body.content,
-    createdAt: Date.now(),
-  };
+  const deleteSessionMessages = await db
+    .delete(messagesTable)
+    .where(eq(messagesTable.sessionId, sessionId))
+    .returning();
 
-  const [message] = await db.insert(messagesTable).values(newMessage).returning();
+  const [deleteSession] = await db
+    .delete(sessionsTable)
+    .where(eq(sessionsTable.id, sessionId))
+    .returning();
 
-  return c.json({ message });
+  return c.json({ deleteSession, deleteSessionMessages });
+});
+
+chatApp.delete("messages/:messageId", async (c) => {
+  const db = c.get("db");
+  const userId = c.get("user")?.id;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+  const messageId = Number(c.req.param("messageId"));
+
+  const deleteMessage = await db
+    .delete(messagesTable)
+    .where(eq(messagesTable.id, messageId))
+    .returning();
+
+  return c.json({ deleteMessage });
 });
 
 chatApp.post("sessions/:sessionId/stream", async (c) => {
@@ -107,6 +123,11 @@ chatApp.post("sessions/:sessionId/stream", async (c) => {
     createdAt: Date.now(),
   };
 
+  const rawMessages = await db
+    .select({ role: messagesTable.role, content: messagesTable.content })
+    .from(messagesTable)
+    .where(eq(messagesTable.sessionId, sessionId));
+
   const [userMessage] = await db.insert(messagesTable).values(newMessage).returning();
 
   try {
@@ -122,6 +143,7 @@ chatApp.post("sessions/:sessionId/stream", async (c) => {
           role: "system",
           content: "You are a helpful assistant.仅回复不带任何格式的纯文本内容",
         },
+        ...rawMessages,
         {
           role: "user",
           content: newMessage.content,

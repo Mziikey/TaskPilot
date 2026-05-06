@@ -12,11 +12,18 @@ export const Route = createFileRoute("/_app/chat/$sessionId")({
 function RouteComponent() {
   const { sessionId } = Route.useParams();
   const [chatInput, setChatInput] = useState("");
+  const [textState, setTextState] = useState(false);
 
   const { data: messages } = useMesssages(sessionId);
-  const { mutate } = useNewStream(sessionId);
+  const { mutate } = useNewStream();
+
   const handleSend = () => {
-    mutate({ role: "user", content: chatInput });
+    mutate({ role: "user", content: chatInput, sessionId });
+    setChatInput("");
+    setTextState(true);
+    setTimeout(() => {
+      setTextState(false);
+    }, 2000);
   };
 
   return (
@@ -39,10 +46,12 @@ function RouteComponent() {
 
       <div className="w-full rounded-xl flex items-center justify-center gap-4 pt-4">
         <TextArea
-          placeholder="new session"
+          value={chatInput}
+          placeholder="new message"
           style={{ width: "50%", resize: "none" }}
           autoSize={{ minRows: 1, maxRows: 6 }}
           size="large"
+          disabled={textState}
           allowClear
           onChange={(e) => setChatInput(e.target.value)}
           onPressEnter={handleSend}
