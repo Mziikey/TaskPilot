@@ -28,7 +28,7 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-1 flex-col items-center p-8">
-      <div className="grow w-full max-h-[82vh] flex flex-col gap-2 items-end overflow-y-auto pb-8">
+      <div className="grow w-full h-[82vh] flex flex-col gap-2 items-end overflow-y-auto pb-8">
         {(messages ?? []).map((d) =>
           d ? (
             <div
@@ -45,7 +45,7 @@ function RouteComponent() {
         )}
       </div>
 
-      <div className="w-full rounded-xl flex items-center justify-center gap-4 pt-4">
+      <div className="w-full flex-1 rounded-xl flex items-center justify-center gap-4 pt-4">
         <TextArea
           value={chatInput}
           placeholder="new message"

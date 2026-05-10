@@ -1,5 +1,5 @@
 import { useMe } from "#/api/auth";
-import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useLocation } from "@tanstack/react-router";
 import React, { useState } from "react";
 import {
   CheckSquareOutlined,
@@ -39,10 +39,10 @@ function getItem(
 }
 
 const items: MenuItem[] = [
-  getItem(<Link to="/dashboard">DashBoard</Link>, "1", <PieChartOutlined />),
-  getItem(<Link to="/all">my tasks</Link>, "2", <CheckSquareOutlined />),
-  getItem(<Link to="/new">new task</Link>, "3", <DesktopOutlined />),
-  getItem(<Link to="/chat">chat</Link>, "5", <FieldTimeOutlined />),
+  getItem(<Link to="/dashboard">DashBoard</Link>, "dashboard", <PieChartOutlined />),
+  getItem(<Link to="/all">my tasks</Link>, "all", <CheckSquareOutlined />),
+  getItem(<Link to="/new">new task</Link>, "new", <DesktopOutlined />),
+  getItem(<Link to="/chat">chat</Link>, "chat", <FieldTimeOutlined />),
 ];
 
 function RouteComponent() {
@@ -51,7 +51,8 @@ function RouteComponent() {
     token: { colorBgContainer },
   } = theme.useToken();
 
-  const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const path = location.pathname.split("/")[1];
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -68,7 +69,7 @@ function RouteComponent() {
           <ListTodo />
           {!collapsed && <span>Task Pilot</span>}
         </div>
-        <Menu defaultSelectedKeys={["1"]} mode="inline" items={items} style={{ height: 100 }} />
+        <Menu selectedKeys={[path]} mode="inline" items={items} style={{ height: 100 }} />
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>

@@ -29,9 +29,9 @@ function RouteComponent() {
   };
 
   return (
-    <div className="flex flex-1 flex-col items-center">
-      <div className="h-[82vh]" />
-      <div className="h-1/10 w-full rounded-xl flex items-center justify-center gap-4">
+    <div className="flex flex-1 flex-col items-center justify-center gap-4">
+      <p className="font-medium text-3xl pb-8">你在忙什么</p>
+      <div className="w-full rounded-xl flex items-center justify-center gap-4">
         <TextArea
           value={chatInput}
           placeholder="new session"

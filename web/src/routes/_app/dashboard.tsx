@@ -1,10 +1,8 @@
 import { useGetTasks } from "#/api/task";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Empty, Progress, Spin } from "antd";
 
 export const DashboardPage = () => {
-  const qc = useQueryClient();
   const { isPending, data } = useGetTasks();
   if (isPending) {
     return <Spin size="large" />;
