@@ -18,9 +18,7 @@ function RouteComponent() {
           setTimeout(() => navigate({ to: "/" }), 5000);
         },
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   return (

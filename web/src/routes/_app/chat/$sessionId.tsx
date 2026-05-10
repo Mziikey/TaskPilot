@@ -32,6 +32,7 @@ function RouteComponent() {
         {(messages ?? []).map((d) =>
           d ? (
             <div
+              key={d.id}
               className={clsx(
                 "max-w-xl text-lg border border-gray-50 rounded-xl p-3",
                 d.role === "assistant" ? "self-start" : "self-end",

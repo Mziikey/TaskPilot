@@ -9,7 +9,6 @@ export const Me = () => {
   const { isPending, isError, data } = useMe();
 
   if (isError && location.pathname === "/") {
-    console.log("no login");
     navigate({ to: "/login" });
     return null;
   }

@@ -31,7 +31,6 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: (register: RegisterInfo) => {
-      console.log(register);
       return getJson("/api/auth/register", "POST", register);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["auth", "me"] }),

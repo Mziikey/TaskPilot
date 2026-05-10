@@ -14,7 +14,6 @@ import { Route as AppRouteRouteImport } from './routes/_app/route'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
-import { Route as AppScheduleRouteImport } from './routes/_app/schedule'
 import { Route as AppNewRouteImport } from './routes/_app/new'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppChatRouteImport } from './routes/_app/chat'
@@ -44,11 +43,6 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => AuthRouteRoute,
-} as any)
-const AppScheduleRoute = AppScheduleRouteImport.update({
-  id: '/schedule',
-  path: '/schedule',
-  getParentRoute: () => AppRouteRoute,
 } as any)
 const AppNewRoute = AppNewRouteImport.update({
   id: '/new',
@@ -87,7 +81,6 @@ export interface FileRoutesByFullPath {
   '/chat': typeof AppChatRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/new': typeof AppNewRoute
-  '/schedule': typeof AppScheduleRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/chat/$sessionId': typeof AppChatSessionIdRoute
@@ -98,7 +91,6 @@ export interface FileRoutesByTo {
   '/all': typeof AppAllRoute
   '/dashboard': typeof AppDashboardRoute
   '/new': typeof AppNewRoute
-  '/schedule': typeof AppScheduleRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/chat/$sessionId': typeof AppChatSessionIdRoute
@@ -112,7 +104,6 @@ export interface FileRoutesById {
   '/_app/chat': typeof AppChatRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/new': typeof AppNewRoute
-  '/_app/schedule': typeof AppScheduleRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_app/': typeof AppIndexRoute
@@ -127,7 +118,6 @@ export interface FileRouteTypes {
     | '/chat'
     | '/dashboard'
     | '/new'
-    | '/schedule'
     | '/login'
     | '/register'
     | '/chat/$sessionId'
@@ -138,7 +128,6 @@ export interface FileRouteTypes {
     | '/all'
     | '/dashboard'
     | '/new'
-    | '/schedule'
     | '/login'
     | '/register'
     | '/chat/$sessionId'
@@ -151,7 +140,6 @@ export interface FileRouteTypes {
     | '/_app/chat'
     | '/_app/dashboard'
     | '/_app/new'
-    | '/_app/schedule'
     | '/_auth/login'
     | '/_auth/register'
     | '/_app/'
@@ -200,13 +188,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/login'
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRouteRoute
-    }
-    '/_app/schedule': {
-      id: '/_app/schedule'
-      path: '/schedule'
-      fullPath: '/schedule'
-      preLoaderRoute: typeof AppScheduleRouteImport
-      parentRoute: typeof AppRouteRoute
     }
     '/_app/new': {
       id: '/_app/new'
@@ -271,7 +252,6 @@ interface AppRouteRouteChildren {
   AppChatRoute: typeof AppChatRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppNewRoute: typeof AppNewRoute
-  AppScheduleRoute: typeof AppScheduleRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -280,7 +260,6 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppChatRoute: AppChatRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppNewRoute: AppNewRoute,
-  AppScheduleRoute: AppScheduleRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

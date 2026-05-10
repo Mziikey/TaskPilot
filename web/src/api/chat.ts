@@ -13,7 +13,7 @@ export type MessagesType = {
   id: number;
   sessionId: number;
   role: "user" | "assistant";
-  content: "string";
+  content: string;
   createdAt: number;
 };
 
@@ -76,9 +76,6 @@ export const useNewStream = () => {
       if (!reader) return;
       let replyId: number;
       let aiReplyTime: number;
-
-      const olded = qc.getQueryData(["messages", variables.sessionId]);
-      console.log("olded", olded);
 
       while (1) {
         const d = await reader.read();

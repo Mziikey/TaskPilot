@@ -30,7 +30,7 @@ function RouteComponent() {
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      <div className="h-[82vh]">content</div>
+      <div className="h-[82vh]" />
       <div className="h-1/10 w-full rounded-xl flex items-center justify-center gap-4">
         <TextArea
           value={chatInput}

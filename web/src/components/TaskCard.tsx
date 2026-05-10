@@ -33,9 +33,7 @@ const EditCard = ({
           }, 1000);
         },
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   return (
@@ -64,9 +62,7 @@ export const TaskCard = ({ task }: { task: TaskType }) => {
           message.success("已成功删除该任务", 2);
         },
       });
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
