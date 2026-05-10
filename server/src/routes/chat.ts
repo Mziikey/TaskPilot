@@ -141,7 +141,7 @@ chatApp.post("sessions/:sessionId/stream", async (c) => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant.仅回复不带任何格式的纯文本内容",
+          content: "You are a helpful assistant.",
         },
         ...rawMessages,
         {
