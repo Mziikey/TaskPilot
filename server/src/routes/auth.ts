@@ -4,6 +4,7 @@ import * as argon2 from "argon2";
 import { deleteCookie, generateCookie } from "hono/cookie";
 import { eq } from "drizzle-orm";
 import type { dbType } from "../index.js";
+import { sign } from "hono/jwt";
 
 export type UserInfo = {
   id: number;
@@ -14,6 +15,12 @@ export type RegisterInfo = {
   username: string;
   nickname: string;
   password: string;
+};
+
+export type PayloadType = {
+  userId: number;
+  username: string;
+  exp: number;
 };
 
 const authApp = new Hono<{ Variables: { user: UserInfo | undefined; db: dbType } }>();
@@ -37,7 +44,22 @@ authApp.post("/login", async (c) => {
         .from(usersTable)
         .where(eq(usersTable.username, body.username));
       const id = userId[0].userId;
-      const newCookie = generateCookie("userId", String(id));
+
+      const payload: PayloadType = {
+        userId: id,
+        username: body.username,
+        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 1day 过期
+      };
+
+      const secret = "mySecretKey";
+      const token = await sign(payload, secret);
+
+      const newCookie = generateCookie("access_token", token, {
+        path: "/",
+        secure: true,
+        httpOnly: true,
+        maxAge: payload.exp,
+      });
       c.header("Set-Cookie", newCookie);
 
       return c.json({ userId: id, username: body.username });
@@ -46,8 +68,9 @@ authApp.post("/login", async (c) => {
 });
 
 authApp.post("/logout", async (c) => {
-  const dc = deleteCookie(c, "userId");
-  return c.json({ userId: dc });
+  const user = c.get("user");
+  deleteCookie(c, "access_token");
+  return c.json(user);
 });
 
 authApp.get("/me", async (c) => {
