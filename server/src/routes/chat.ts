@@ -5,7 +5,6 @@ import type { dbType } from "../index.js";
 import { eq } from "drizzle-orm";
 import { streamSSE, streamText } from "hono/streaming";
 import { messagesTable, sessionsTable } from "../db/schema/chat.js";
-import { error } from "console";
 
 const chatApp = new Hono<{ Variables: { user: UserInfo | undefined; db: dbType } }>();
 

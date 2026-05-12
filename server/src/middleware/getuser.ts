@@ -13,11 +13,11 @@ export const getUser = createMiddleware(async (c, next) => {
     await next();
     return;
   }
-  const secretKey = "mySecretKey";
+  const secret = process.env.COOKIE_KEY;
+  if (!secret) process.exit(1);
 
   try {
-    const decodedPayload = await verify(jwtToken, secretKey, "HS256");
-    console.log(decodedPayload);
+    const decodedPayload = await verify(jwtToken, secret, "HS256");
 
     const thisuserId = decodedPayload.userId;
 

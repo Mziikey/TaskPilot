@@ -51,7 +51,9 @@ authApp.post("/login", async (c) => {
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 1day 过期
       };
 
-      const secret = "mySecretKey";
+      const secret = process.env.COOKIE_KEY;
+      if (!secret) process.exit(1);
+
       const token = await sign(payload, secret);
 
       const newCookie = generateCookie("access_token", token, {
