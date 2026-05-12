@@ -34,9 +34,7 @@ export const getUser = createMiddleware(async (c, next) => {
       c.set("user", userinfo);
     }
   } catch {
-    deleteCookie(c, "access_token", {
-      path: "/",
-    });
+    deleteCookie(c, "access_token");
   }
   await next();
 });

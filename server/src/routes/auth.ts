@@ -55,11 +55,11 @@ authApp.post("/login", async (c) => {
       const token = await sign(payload, secret);
 
       const newCookie = generateCookie("access_token", token, {
-        path: "/",
         secure: true,
         httpOnly: true,
-        maxAge: payload.exp,
+        maxAge: 60 * 60 * 24,
       });
+
       c.header("Set-Cookie", newCookie);
 
       return c.json({ userId: id, username: body.username });
