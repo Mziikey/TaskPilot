@@ -42,6 +42,21 @@ tasksApp.post("/add", async (c) => {
   return c.json({ task: body.title });
 });
 
+tasksApp.post("/add/batch", async (c) => {
+  const db = c.get("db");
+  const userId = c.get("user")?.id;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+  const body: TaskInfo[] = await c.req.json();
+
+  const tasks = body.map((task) => ({ ...task, userId: userId }));
+
+  await db.insert(tasksTable).values(tasks.map((t) => t));
+  console.log("task inserted");
+  return c.json(tasks.map((t) => t.title));
+});
+
 tasksApp.delete("/delete/:id", async (c) => {
   const db = c.get("db");
   const taskId = c.req.param("id");

@@ -17,6 +17,7 @@ import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AppNewRouteImport } from './routes/_app/new'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppChatRouteImport } from './routes/_app/chat'
+import { Route as AppAssistantRouteImport } from './routes/_app/assistant'
 import { Route as AppAllRouteImport } from './routes/_app/all'
 import { Route as AppChatIndexRouteImport } from './routes/_app/chat/index'
 import { Route as AppChatSessionIdRouteImport } from './routes/_app/chat/$sessionId'
@@ -59,6 +60,11 @@ const AppChatRoute = AppChatRouteImport.update({
   path: '/chat',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppAssistantRoute = AppAssistantRouteImport.update({
+  id: '/assistant',
+  path: '/assistant',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppAllRoute = AppAllRouteImport.update({
   id: '/all',
   path: '/all',
@@ -78,6 +84,7 @@ const AppChatSessionIdRoute = AppChatSessionIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/all': typeof AppAllRoute
+  '/assistant': typeof AppAssistantRoute
   '/chat': typeof AppChatRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/new': typeof AppNewRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/all': typeof AppAllRoute
+  '/assistant': typeof AppAssistantRoute
   '/dashboard': typeof AppDashboardRoute
   '/new': typeof AppNewRoute
   '/login': typeof AuthLoginRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteRouteWithChildren
   '/_auth': typeof AuthRouteRouteWithChildren
   '/_app/all': typeof AppAllRoute
+  '/_app/assistant': typeof AppAssistantRoute
   '/_app/chat': typeof AppChatRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/new': typeof AppNewRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/all'
+    | '/assistant'
     | '/chat'
     | '/dashboard'
     | '/new'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/all'
+    | '/assistant'
     | '/dashboard'
     | '/new'
     | '/login'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_auth'
     | '/_app/all'
+    | '/_app/assistant'
     | '/_app/chat'
     | '/_app/dashboard'
     | '/_app/new'
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppChatRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/assistant': {
+      id: '/_app/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof AppAssistantRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/all': {
       id: '/_app/all'
       path: '/all'
@@ -249,6 +268,7 @@ const AppChatRouteWithChildren =
 
 interface AppRouteRouteChildren {
   AppAllRoute: typeof AppAllRoute
+  AppAssistantRoute: typeof AppAssistantRoute
   AppChatRoute: typeof AppChatRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppNewRoute: typeof AppNewRoute
@@ -257,6 +277,7 @@ interface AppRouteRouteChildren {
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAllRoute: AppAllRoute,
+  AppAssistantRoute: AppAssistantRoute,
   AppChatRoute: AppChatRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppNewRoute: AppNewRoute,

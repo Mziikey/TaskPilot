@@ -8,6 +8,7 @@ import authApp from "./routes/auth.js";
 import tasksApp from "./routes/task.js";
 import { createMiddleware } from "hono/factory";
 import chatApp from "./routes/chat.js";
+import aiApp from "./routes/ai.js";
 
 const db = drizzle(process.env.DB_FILE_NAME!);
 export type dbType = typeof db;
@@ -27,6 +28,7 @@ app.use(getUser);
 app.route("/auth", authApp);
 app.route("/tasks", tasksApp);
 app.route("/chat", chatApp);
+app.route("/ai", aiApp);
 
 serve(
   {

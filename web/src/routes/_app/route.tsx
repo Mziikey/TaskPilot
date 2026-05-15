@@ -5,9 +5,7 @@ import {
   CheckSquareOutlined,
   DesktopOutlined,
   FieldTimeOutlined,
-  FileOutlined,
   PieChartOutlined,
-  TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -43,6 +41,7 @@ const items: MenuItem[] = [
   getItem(<Link to="/all">my tasks</Link>, "all", <CheckSquareOutlined />),
   getItem(<Link to="/new">new task</Link>, "new", <DesktopOutlined />),
   getItem(<Link to="/chat">chat</Link>, "chat", <FieldTimeOutlined />),
+  getItem(<Link to="/assistant">AI assistant</Link>, "assistant", <UserOutlined />),
 ];
 
 function RouteComponent() {
