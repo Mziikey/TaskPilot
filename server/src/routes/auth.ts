@@ -57,7 +57,6 @@ authApp.post("/login", async (c) => {
       const token = await sign(payload, secret);
 
       const newCookie = generateCookie("access_token", token, {
-        secure: true,
         httpOnly: true,
         maxAge: 60 * 60 * 24,
       });
