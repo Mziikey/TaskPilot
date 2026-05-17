@@ -42,6 +42,16 @@ export const useDeleteSession = () => {
   });
 };
 
+export const useGenerateTitle = () => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: (sessionId: number) =>
+      getJson(`/api/chat/sessions/${sessionId}/generate-title`, "POST"),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["sessions"] }),
+  });
+};
+
 export const useMesssages = (sessionId: string) => {
   return useQuery<MessagesType[]>({
     queryKey: ["messages", sessionId],
@@ -81,7 +91,7 @@ export const useNewStream = () => {
         const d = await reader.read();
         if (d.done) break;
 
-        const text = new TextDecoder().decode(d.value);
+        const text = new TextDecoder().decode(d.value, { stream: true });
 
         const value: StreamType = JSON.parse(text);
 
@@ -112,6 +122,8 @@ export const useNewStream = () => {
           });
         }
       }
+
+      qc.invalidateQueries({ queryKey: ["sessions"] });
     },
   });
 };

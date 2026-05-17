@@ -1,4 +1,4 @@
-import { useNewSession, useNewStream, type SessionsType } from "#/api/chat";
+import { useGenerateTitle, useNewSession, useNewStream, type SessionsType } from "#/api/chat";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "antd";
 import TextArea from "antd/es/input/TextArea";
@@ -12,17 +12,19 @@ function RouteComponent() {
   const [chatInput, setChatInput] = useState("");
   const { mutateAsync } = useNewSession();
   const { mutate: newStream } = useNewStream();
+  const { mutate: generateTitle } = useGenerateTitle();
 
   const navigate = useNavigate({ from: "/chat" });
   const handleSend = async () => {
     await mutateAsync(
-      { title: chatInput },
+      { title: "新对话" },
       {
         onSuccess: (data) => {
           setChatInput("");
           const sessionId = String(data.id);
           navigate({ to: sessionId });
           newStream({ role: "user", content: chatInput, sessionId });
+          generateTitle(Number(sessionId));
         },
       },
     );

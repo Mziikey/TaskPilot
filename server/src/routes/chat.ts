@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import OpenAI from "openai";
 import type { UserInfo } from "./auth.js";
 import type { dbType } from "../index.js";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { streamSSE, streamText } from "hono/streaming";
 import { messagesTable, sessionsTable } from "../db/schema/chat.js";
 
@@ -171,6 +171,7 @@ chatApp.post("sessions/:sessionId/stream", async (c) => {
           await s.writeln(JSON.stringify({ type: "reply", reply: aiReply }));
         }
       }
+
       await db
         .update(messagesTable)
         .set({ content: aiReply })
@@ -180,6 +181,62 @@ chatApp.post("sessions/:sessionId/stream", async (c) => {
     console.log(`错误信息：${e}`);
     console.log("请参考文档：https://help.aliyun.com/model-studio/developer-reference/error-code");
     return new Response(JSON.stringify({ error: e }));
+  }
+});
+
+chatApp.post("/sessions/:sessionId/generate-title", async (c) => {
+  const db = c.get("db");
+  const userId = c.get("user")?.id;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+  const sessionId = Number(c.req.param("sessionId"));
+
+  const [sessionInfo] = await db
+    .select()
+    .from(sessionsTable)
+    .where(eq(sessionsTable.id, sessionId));
+
+  if (sessionInfo.title === "新对话") {
+    const [firstQuestion] = await db
+      .select({ question: messagesTable.content })
+      .from(messagesTable)
+      .where(and(eq(messagesTable.sessionId, sessionId), eq(messagesTable.role, "user")));
+    try {
+      const openai = new OpenAI({
+        apiKey: process.env.DASHSCOPE_API_KEY,
+        baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      });
+
+      const aiReply = await openai.chat.completions.create({
+        model: "qwen3.6-plus",
+        messages: [
+          {
+            role: "system",
+            content:
+              "你是一个非常善于总结ai对话标题的助手，下面是用户提的第一个问题，请你根据这个问题总结一个严格在12字以内的对话标题",
+          },
+          {
+            role: "user",
+            content: firstQuestion.question,
+          },
+        ],
+      });
+
+      const aiTitle = aiReply.choices[0].message.content;
+
+      await db
+        .update(sessionsTable)
+        .set({ title: aiTitle ? aiTitle : "新对话" })
+        .where(eq(sessionsTable.id, sessionId));
+
+      return c.json({ title: aiTitle });
+    } catch (e) {
+      console.log(`错误信息：${e}`);
+      console.log(
+        "请参考文档：https://help.aliyun.com/model-studio/developer-reference/error-code",
+      );
+    }
   }
 });
 

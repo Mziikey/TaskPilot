@@ -29,6 +29,8 @@ function RouteComponent() {
     }, 2000);
   };
 
+  // console.log(messages === undefined ? "no" : messages[messages.length - 1]);
+
   return (
     <div className="flex flex-1 flex-col items-center p-8">
       <div className="grow w-full h-[82vh] flex flex-col gap-2 items-end overflow-y-auto pb-8">

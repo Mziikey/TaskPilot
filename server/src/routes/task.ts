@@ -3,7 +3,6 @@ import { tasksTable } from "../db/schema/task.js";
 import { eq } from "drizzle-orm";
 import type { dbType } from "../index.js";
 import type { UserInfo } from "./auth.js";
-import { usersTable } from "../db/schema/user.js";
 
 export type TaskInfo = {
   title: string;
@@ -23,7 +22,6 @@ tasksApp.get("/", async (c) => {
     return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
   }
   const response = await db.select().from(tasksTable).where(eq(tasksTable.userId, userId));
-  console.log(response);
   return c.json(response);
 });
 
