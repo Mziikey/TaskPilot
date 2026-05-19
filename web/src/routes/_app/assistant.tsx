@@ -22,7 +22,8 @@ function RouteComponent() {
   const assistanText = sessionStorage.getItem("ai-assistant");
   const textLists: { title: string; reply: string; timestamp: number }[] = JSON.parse(
     assistanText ? assistanText : "[]",
-  ).reverse();
+  );
+  textLists.sort((a, b) => b.timestamp - a.timestamp);
 
   const handleSend = () => {
     setIsDisabled(true);
@@ -68,7 +69,7 @@ function RouteComponent() {
           </Button>
         </div>
         <div className="flex flex-1 gap-2 w-full h-full p-4 min-h-0">
-          <div className=" max-h-full w-2/3 pl-4 pr-4 flex flex-col gap-4 text-base overflow-auto">
+          <div className=" max-h-full w-2/3 pl-4 pb-4 pr-4 flex flex-col gap-4 text-base overflow-auto">
             {textLists.map((t) => (
               <div className="p-4 shadow-lg rounded-2xl bg-gray-50">
                 <div className="flex justify-between italic">

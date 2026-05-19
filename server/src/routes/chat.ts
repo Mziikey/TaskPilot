@@ -5,6 +5,7 @@ import type { dbType } from "../index.js";
 import { eq, and } from "drizzle-orm";
 import { streamSSE, streamText } from "hono/streaming";
 import { messagesTable, sessionsTable } from "../db/schema/chat.js";
+import type { ChatCompletionCreateParamsStreaming } from "openai/resources";
 
 const chatApp = new Hono<{ Variables: { user: UserInfo | undefined; db: dbType } }>();
 
@@ -135,8 +136,10 @@ chatApp.post("sessions/:sessionId/stream", async (c) => {
       baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
     });
 
+    // @ts-expect-error enable_thinking is for qwen
     const stream = await openai.chat.completions.create({
-      model: "qwen3.6-plus",
+      stream: true,
+      model: "qwen3.6-flash",
       messages: [
         {
           role: "system",
@@ -148,8 +151,7 @@ chatApp.post("sessions/:sessionId/stream", async (c) => {
           content: newMessage.content,
         },
       ],
-      stream: true,
-      stream_options: { include_usage: true },
+      enable_thinking: false,
     });
 
     let aiReply = "";
@@ -209,7 +211,7 @@ chatApp.post("/sessions/:sessionId/generate-title", async (c) => {
       });
 
       const aiReply = await openai.chat.completions.create({
-        model: "qwen3.6-plus",
+        model: "qwen3.6-flash",
         messages: [
           {
             role: "system",
@@ -221,6 +223,8 @@ chatApp.post("/sessions/:sessionId/generate-title", async (c) => {
             content: firstQuestion.question,
           },
         ],
+        // @ts-expect-error enable_thinking is for qwen
+        enable_thinking: false,
       });
 
       const aiTitle = aiReply.choices[0].message.content;

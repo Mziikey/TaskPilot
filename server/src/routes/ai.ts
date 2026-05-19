@@ -1,5 +1,5 @@
 import { generateText, stepCountIs, streamText, tool } from "ai";
-import { createAlibaba } from "@ai-sdk/alibaba";
+import { createAlibaba, type AlibabaLanguageModelOptions } from "@ai-sdk/alibaba";
 import { Hono } from "hono";
 import type { UserInfo } from "./auth.js";
 import type { dbType } from "../index.js";
@@ -66,17 +66,28 @@ aiApp.post("tasks", async (c) => {
 
   try {
     const result = await generateText({
-      model: alibaba.chatModel("qwen3.6-plus"),
+      model: alibaba.languageModel("qwen3.6-flash"),
+      providerOptions: {
+        alibaba: {
+          enableThinking: true,
+          // thinkingBudget: 2048,
+        } satisfies AlibabaLanguageModelOptions,
+      },
       stopWhen: stepCountIs(12),
       system: `
-你是一个任务管理助手,所有提到都时间，都是北京时间。
-当前北京时间是：${new Date().toISOString()}。
+你是一个任务管理助手,所有提到的时间，都是北京时间。
+当前时间是：${new Date().toISOString()}。
 
 当用户询问任务、待办、日程时，需要调用 listTasks 工具。
 如果用户表达的是相对时间，例如“今天”“明天”“未来三天”“下周三”，你需要根据当前时间换算成毫秒时间戳。
 如果用户没有明确时间范围，默认查询今天。
 `,
       tools: {
+        // TODO:
+        //   getTaskDetail
+        //   summarizeTodayTasks
+        //   summarizeOverdueTasks
+
         listTasks: tool({
           description:
             "根据用户指定的任意时间范围，列出该时间范围内需要完成的任务、任务、待办、日程",
@@ -92,10 +103,8 @@ aiApp.post("tasks", async (c) => {
             return taskLists;
           },
         }),
-        //   getTaskDetail
-        //   summarizeTodayTasks
-        //   summarizeOverdueTasks
       },
+
       prompt: question,
     });
 

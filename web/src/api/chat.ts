@@ -87,39 +87,52 @@ export const useNewStream = () => {
       let replyId: number;
       let aiReplyTime: number;
 
+      let buffer: string = "";
+
       while (1) {
         const d = await reader.read();
         if (d.done) break;
 
         const text = new TextDecoder().decode(d.value, { stream: true });
+        buffer += text;
 
-        const value: StreamType = JSON.parse(text);
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
 
-        if (value.type === "info") {
-          qc.setQueryData(["messages", variables.sessionId], (oldData: MessagesType[]) => {
-            const data = oldData.filter(
-              (d) => d.id !== value.userMessage.id && d.id !== value.aiReplyInfo.id,
-            );
-            return [...data, value.userMessage, value.aiReplyInfo];
-          });
-          replyId = value.aiReplyInfo.id;
-          aiReplyTime = value.aiReplyInfo.createdAt;
-        }
+        for (const line of lines) {
+          let value: StreamType;
+          try {
+            value = JSON.parse(line);
+          } catch (e) {
+            continue;
+          }
 
-        if (value.type === "reply") {
-          qc.setQueryData(["messages", variables.sessionId], (oldData: MessagesType[]) => {
-            const old = oldData.filter((s) => s.id !== replyId);
-            return [
-              ...old,
-              {
-                id: replyId,
-                sessionId: variables.sessionId,
-                role: "assistant",
-                content: value.reply,
-                createdAt: aiReplyTime,
-              },
-            ];
-          });
+          if (value.type === "info") {
+            qc.setQueryData(["messages", variables.sessionId], (oldData: MessagesType[]) => {
+              const data = oldData.filter(
+                (d) => d.id !== value.userMessage.id && d.id !== value.aiReplyInfo.id,
+              );
+              return [...data, value.userMessage, value.aiReplyInfo];
+            });
+            replyId = value.aiReplyInfo.id;
+            aiReplyTime = value.aiReplyInfo.createdAt;
+          }
+
+          if (value.type === "reply") {
+            qc.setQueryData(["messages", variables.sessionId], (oldData: MessagesType[]) => {
+              const old = oldData.filter((s) => s.id !== replyId);
+              return [
+                ...old,
+                {
+                  id: replyId,
+                  sessionId: variables.sessionId,
+                  role: "assistant",
+                  content: value.reply,
+                  createdAt: aiReplyTime,
+                },
+              ];
+            });
+          }
         }
       }
 

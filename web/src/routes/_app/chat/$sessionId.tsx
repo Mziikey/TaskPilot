@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Button, Spin } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import clsx from "clsx";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -13,12 +13,21 @@ export const Route = createFileRoute("/_app/chat/$sessionId")({
 });
 
 function RouteComponent() {
+  const bottomRef = useRef<HTMLDivElement | null>(null);
   const { sessionId } = Route.useParams();
   const [chatInput, setChatInput] = useState("");
   const [textState, setTextState] = useState(false);
 
   const { data: messages } = useMesssages(sessionId);
   const { mutate } = useNewStream();
+
+  const lastMessageContent = messages?.at(-1)?.content;
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({
+      behavior: "auto",
+      block: "end",
+    });
+  }, [messages?.length, lastMessageContent]);
 
   const handleSend = () => {
     mutate({ role: "user", content: chatInput, sessionId });
@@ -28,6 +37,8 @@ function RouteComponent() {
       setTextState(false);
     }, 2000);
   };
+
+  console.log("render:", messages?.at(-1)?.content);
 
   // console.log(messages === undefined ? "no" : messages[messages.length - 1]);
 
@@ -39,13 +50,13 @@ function RouteComponent() {
             <div
               key={d.id}
               className={clsx(
-                "max-w-3xl text-lg border border-gray-50 rounded-xl p-4",
+                "max-w-3xl border border-gray-50 rounded-xl p-4",
                 d.role === "assistant" ? "self-start" : "self-end",
                 d.role === "assistant" ? "bg-slate-100" : "bg-sky-100",
               )}
             >
               {d.content.length > 0 ? (
-                <div className="prose prose-lg max-w-none prose-pre:bg-gray-100 prose-pre:text-black prose-code:before:content-none prose-code:after:content-none">
+                <div className="prose prose-base max-w-none prose-pre:bg-gray-100 prose-pre:text-black prose-code:before:content-none prose-code:after:content-none">
                   <Markdown
                     remarkPlugins={[remarkGfm]}
                     components={{
@@ -70,6 +81,7 @@ function RouteComponent() {
               ) : (
                 <Spin size="small" />
               )}
+              <div ref={bottomRef} />
             </div>
           ) : null,
         )}
