@@ -23,6 +23,13 @@ export type PayloadType = {
   exp: number;
 };
 
+export type MCPPayloadType = {
+  userId: number;
+  username: string;
+  type: "mcp";
+  exp: number;
+};
+
 const authApp = new Hono<{ Variables: { user: UserInfo | undefined; db: dbType } }>();
 
 authApp.post("/login", async (c) => {
@@ -66,6 +73,30 @@ authApp.post("/login", async (c) => {
       return c.json({ userId: id, username: body.username });
     } else return new Response(JSON.stringify({ error: "password" }), { status: 400 });
   }
+});
+
+authApp.get("/mcp-token", async (c) => {
+  const db = c.get("db");
+  const userId = c.get("user")?.id;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+
+  const [user] = await db.select().from(usersTable).where(eq(usersTable.id, userId));
+
+  const payload: MCPPayloadType = {
+    userId: user.id,
+    username: user.username,
+    type: "mcp",
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30day 过期
+  };
+
+  const secret = process.env.COOKIE_KEY;
+  if (!secret) process.exit(1);
+
+  const token = await sign(payload, secret);
+
+  return c.json(token);
 });
 
 authApp.post("/logout", async (c) => {

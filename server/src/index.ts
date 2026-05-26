@@ -9,6 +9,8 @@ import tasksApp from "./routes/task.js";
 import { createMiddleware } from "hono/factory";
 import chatApp from "./routes/chat.js";
 import aiApp from "./routes/ai.js";
+import mcpApp from "./routes/mcp.js";
+import { mcpAuth } from "./middleware/mcp.js";
 
 const db = drizzle(process.env.DB_FILE_NAME!);
 export type dbType = typeof db;
@@ -29,6 +31,9 @@ app.route("/auth", authApp);
 app.route("/tasks", tasksApp);
 app.route("/chat", chatApp);
 app.route("/ai", aiApp);
+
+app.use("/mcp/*", mcpAuth);
+app.route("/mcp", mcpApp);
 
 serve(
   {
