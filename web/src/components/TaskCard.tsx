@@ -1,12 +1,19 @@
 import dayjs from "dayjs";
-import { useDeleteTask, useEditTask, type SubmitTaskType, type TaskType } from "#/api/task";
+import {
+  useCompleteTask,
+  useDeleteTask,
+  useEditTask,
+  type SubmitTaskType,
+  type TaskType,
+} from "#/api/task";
 import {
   CalendarOutlined,
+  CheckCircleOutlined,
   ClockCircleOutlined,
   DeleteOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
-import { Card, message, Modal, Tag, Typography } from "antd";
+import { Button, Card, message, Modal, Tag, Typography } from "antd";
 import { useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { TaskForm } from "./TaskForm";
 
@@ -73,6 +80,20 @@ export const TaskCard = ({ task }: { task: TaskType }) => {
   const taskId = task.id;
 
   const { mutateAsync: deleteTask } = useDeleteTask(taskId);
+  const { mutateAsync: completeTask, isPending: isCompleting } = useCompleteTask(taskId);
+
+  const completeTaskWithId = async () => {
+    try {
+      await completeTask(undefined, {
+        onSuccess: () => {
+          message.success("已完成该任务", 1);
+        },
+      });
+    } catch (e) {
+      message.error("完成任务失败", 2);
+    }
+  };
+
   const deleteTaskWithId = async () => {
     try {
       await deleteTask(undefined, {
@@ -89,14 +110,37 @@ export const TaskCard = ({ task }: { task: TaskType }) => {
   };
   const status = statusMeta[task.status] ?? { label: task.status, color: "default" };
   const priority = priorityMeta[task.priority] ?? { label: task.priority, color: "default" };
+  const actions = [
+    task.status !== "done" ? (
+      <Button
+        key="complete"
+        type="text"
+        icon={<CheckCircleOutlined />}
+        loading={isCompleting}
+        onClick={completeTaskWithId}
+      >
+        Complete
+      </Button>
+    ) : null,
+    <EditCard task={task} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} key="edit">
+      <Button type="text" icon={<SettingOutlined />} onClick={showModal}>
+        Edit
+      </Button>
+    </EditCard>,
+    <Button key="delete" type="text" danger icon={<DeleteOutlined />} onClick={deleteTaskWithId}>
+      Delete
+    </Button>,
+  ].filter(Boolean) as ReactNode[];
 
   return (
-    <div>
+    <div className="w-full">
       <Card
-        style={{ width: 520 }}
+        className="w-full rounded-lg"
         title={
           <div className="flex min-w-0 items-start justify-between gap-3 py-1">
-            <div className="m-0 min-w-0 flex-1 text-lg">{task.title}</div>
+            <Paragraph className="m-0 min-w-0 flex-1 text-lg font-medium" ellipsis={{ rows: 2 }}>
+              {task.title}
+            </Paragraph>
             <div className="flex shrink-0 flex-wrap justify-end gap-2 pt-1">
               <Tag color={status.color} className="m-0">
                 {status.label}
@@ -107,12 +151,7 @@ export const TaskCard = ({ task }: { task: TaskType }) => {
             </div>
           </div>
         }
-        actions={[
-          <EditCard task={task} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen}>
-            <SettingOutlined key="ellipsis" onClick={showModal} />
-          </EditCard>,
-          <DeleteOutlined key="edit" onClick={deleteTaskWithId} />,
-        ]}
+        actions={actions}
       >
         <div className="space-y-3">
           {task.description ? (

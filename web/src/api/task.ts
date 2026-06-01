@@ -47,6 +47,35 @@ export const useEditTask = (taskId: number) => {
   });
 };
 
+export const useCompleteTask = (taskId: number) => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      getJson<{ taskId: number; status: TaskType["status"] }>(
+        `/api/tasks/complete/${taskId}`,
+        "POST",
+      ),
+    onMutate: async () => {
+      await qc.cancelQueries({ queryKey: ["tasks"] });
+
+      const previousTasks = qc.getQueryData<TaskType[]>(["tasks"]);
+
+      qc.setQueryData<TaskType[]>(["tasks"], (oldTasks) =>
+        oldTasks?.map((task) => (task.id === taskId ? { ...task, status: "done" } : task)),
+      );
+
+      return { previousTasks };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousTasks) {
+        qc.setQueryData(["tasks"], context.previousTasks);
+      }
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+};
+
 export const useDeleteTask = (taskId: number) => {
   const qc = useQueryClient();
 

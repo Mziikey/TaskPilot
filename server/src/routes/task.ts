@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { tasksTable } from "../db/schema/task.js";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { dbType } from "../index.js";
 import type { UserInfo } from "./auth.js";
 
@@ -62,8 +62,24 @@ tasksApp.delete("/delete/:id", async (c) => {
   if (!userId) {
     return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
   }
-  await db.delete(tasksTable).where(eq(tasksTable.id, Number(taskId)));
+  await db
+    .delete(tasksTable)
+    .where(and(eq(tasksTable.id, Number(taskId)), eq(tasksTable.userId, userId)));
   return c.json({ taskId: taskId });
+});
+
+tasksApp.post("/complete/:id", async (c) => {
+  const db = c.get("db");
+  const taskId = c.req.param("id");
+  const userId = c.get("user")?.id;
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401 });
+  }
+  await db
+    .update(tasksTable)
+    .set({ status: "done" })
+    .where(and(eq(tasksTable.id, Number(taskId)), eq(tasksTable.userId, userId)));
+  return c.json({ taskId: Number(taskId), status: "done" });
 });
 
 tasksApp.post("/edit/:id", async (c) => {
@@ -84,7 +100,7 @@ tasksApp.post("/edit/:id", async (c) => {
       startAt: body.startAt,
       dueAt: body.dueAt,
     })
-    .where(eq(tasksTable.id, Number(taskId)));
+    .where(and(eq(tasksTable.id, Number(taskId)), eq(tasksTable.userId, userId)));
   return c.json({ task: body.title, taskId: taskId });
 });
 
