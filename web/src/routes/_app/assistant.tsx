@@ -1,48 +1,91 @@
-import { useAiTasks } from "#/api/ai";
-import { TaskSummaryCard } from "#/components/TaskSummaryCard";
+import { useAiTaskStream, type AiAgentStreamEvent } from "#/api/ai";
+import { MarkdownRenderer } from "#/components/MarkdownRenderer";
 import { createFileRoute } from "@tanstack/react-router";
-import { Button, Spin } from "antd";
+import { Button, Spin, Tag } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import dayjs from "dayjs";
 import { useState } from "react";
-import Markdown from "react-markdown";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import remarkGfm from "remark-gfm";
 
 export const Route = createFileRoute("/_app/assistant")({
   component: RouteComponent,
 });
 
+const assistantStorageKey = "ai-assistant";
+
+type AssistantHistoryItem = {
+  title: string;
+  reply: string;
+  timestamp: number;
+};
+
+const readAssistantHistory = () => {
+  const rawHistory = sessionStorage.getItem(assistantStorageKey);
+  if (!rawHistory) return [];
+
+  try {
+    const history = JSON.parse(rawHistory);
+    if (!Array.isArray(history)) return [];
+
+    return history
+      .filter((item): item is AssistantHistoryItem => {
+        return (
+          typeof item?.title === "string" &&
+          typeof item?.reply === "string" &&
+          typeof item?.timestamp === "number"
+        );
+      })
+      .sort((a, b) => b.timestamp - a.timestamp);
+  } catch {
+    return [];
+  }
+};
+
 function RouteComponent() {
   const [assistant, setAssistant] = useState<string | null>("需要我帮您做什么");
   const [assistanInput, setAssistantInput] = useState("");
-  const [isDisabled, setIsDisabled] = useState(false);
-  const { mutate, data, isSuccess, isPending } = useAiTasks();
-
-  const assistanText = sessionStorage.getItem("ai-assistant");
-  const textLists: { title: string; reply: string; timestamp: number }[] = JSON.parse(
-    assistanText ? assistanText : "[]",
-  );
-  textLists.sort((a, b) => b.timestamp - a.timestamp);
+  const [currentReply, setCurrentReply] = useState("");
+  const [agentEvents, setAgentEvents] = useState<AiAgentStreamEvent[]>([]);
+  const [textLists, setTextLists] = useState<AssistantHistoryItem[]>(readAssistantHistory);
+  const { mutate, isPending } = useAiTaskStream();
 
   const handleSend = () => {
-    setIsDisabled(true);
-    setTimeout(() => {
-      setIsDisabled(false);
-      setAssistantInput("");
-    }, 2000);
-    mutate(assistanInput, {
-      onSuccess: (res) => {
-        setAssistant(null);
-        sessionStorage.setItem(
-          "ai-assistant",
-          JSON.stringify([
-            ...textLists,
-            { title: assistanInput, reply: res.text, timestamp: Date.now() },
-          ]),
-        );
+    const question = assistanInput.trim();
+    if (!question || isPending) return;
+
+    setAssistant(null);
+    setAssistantInput("");
+    setCurrentReply("");
+    setAgentEvents([]);
+
+    mutate(
+      {
+        question,
+        onEvent: (event) => {
+          if (event.type === "text-delta") {
+            setCurrentReply((reply) => reply + event.text);
+            return;
+          }
+
+          if (event.type === "final") return;
+
+          setAgentEvents((events) => [...events, event]);
+        },
       },
-    });
+      {
+        onSuccess: (res) => {
+          setAssistant(null);
+          setCurrentReply("");
+          setTextLists((items) => {
+            const nextItems = [
+              { title: question, reply: res.text, timestamp: Date.now() },
+              ...items,
+            ];
+            sessionStorage.setItem(assistantStorageKey, JSON.stringify(nextItems));
+            return nextItems;
+          });
+        },
+      },
+    );
   };
 
   return (
@@ -60,59 +103,77 @@ function RouteComponent() {
             style={{ width: "50%", resize: "none" }}
             autoSize={{ minRows: 1, maxRows: 2 }}
             size="large"
-            disabled={isDisabled}
+            disabled={isPending}
             onChange={(e) => setAssistantInput(e.target.value)}
             onPressEnter={handleSend}
           />
-          <Button size="large" type="primary" onClick={handleSend}>
-            Send
+          <Button size="large" type="primary" loading={isPending} onClick={handleSend}>
+            {isPending ? "Running" : "Send"}
           </Button>
         </div>
         <div className="flex flex-1 gap-2 w-full h-full p-4 min-h-0">
           <div className=" max-h-full w-2/3 pl-4 pb-4 pr-4 flex flex-col gap-4 text-base overflow-auto">
-            {textLists.map((t) => (
+            {currentReply ? (
               <div className="p-4 shadow-lg rounded-2xl bg-gray-50">
+                <div className="mb-4 text-lg font-medium">当前回复</div>
+                <MarkdownRenderer>{currentReply}</MarkdownRenderer>
+              </div>
+            ) : null}
+            {textLists.map((t) => (
+              <div className="p-4 shadow-lg rounded-2xl bg-gray-50" key={t.timestamp}>
                 <div className="flex justify-between italic">
                   <div className="text-lg font-medium  mb-4">{t.title}</div>
                   <div className="font-light text-gray-400">
                     {dayjs(t.timestamp).format("MM月DD日 HH:mm")}
                   </div>
                 </div>
-                <Markdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    code(props) {
-                      const { children, className } = props;
-                      const match = /language-(\w+)/.exec(className || "");
-                      return match ? (
-                        <SyntaxHighlighter language={match[1]}>
-                          {String(children).replace(/\n$/, "")}
-                        </SyntaxHighlighter>
-                      ) : (
-                        <code>{children}</code>
-                      );
-                    },
-                  }}
-                >
-                  {t.reply}
-                </Markdown>
+                <MarkdownRenderer>{t.reply}</MarkdownRenderer>
               </div>
             ))}
           </div>
           <div className=" max-h-full w-1/3 rounded-2xl overflow-auto min-h-0">
-            {isSuccess ? (
-              <div className="flex flex-col gap-4 p-2">
-                {data.data.map((task) => (
-                  <TaskSummaryCard task={task} key={task.id} />
-                ))}
-              </div>
-            ) : isPending ? (
-              <div className="grid bg-slate-50 h-full place-items-center">
-                <Spin size="large" />
+            {isPending || agentEvents.length > 0 ? (
+              <div className="mb-4 rounded-2xl bg-slate-50 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-base font-medium">Agent progress</span>
+                  {isPending ? <Spin size="small" /> : null}
+                </div>
+                <div className="flex flex-col gap-2">
+                  {agentEvents.map((event, index) => (
+                    <div className="rounded-xl bg-white p-3 text-sm" key={`${event.type}-${index}`}>
+                      {event.type === "status" ? (
+                        <div className="flex items-center gap-2">
+                          <Tag className="m-0" color={event.phase === "done" ? "success" : "blue"}>
+                            {event.phase}
+                          </Tag>
+                          <span>{event.message}</span>
+                        </div>
+                      ) : event.type === "tool-call" ? (
+                        <div>
+                          <Tag className="m-0 mb-2" color="processing">
+                            tool call
+                          </Tag>
+                          <div>{event.toolName}</div>
+                          <div className="mt-1 text-xs text-gray-500">{event.inputSummary}</div>
+                        </div>
+                      ) : event.type === "tool-result" ? (
+                        <div>
+                          <Tag className="m-0 mb-2" color="success">
+                            tool done
+                          </Tag>
+                          <div>{event.toolName}</div>
+                          <div className="mt-1 text-xs text-gray-500">{event.outputSummary}</div>
+                        </div>
+                      ) : event.type === "error" ? (
+                        <div className="text-red-500">{event.message}</div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className=" h-full p-4">
-                <p className="w-fit mx-auto text-xl text-gray-400">待加载示任务列表</p>
+                <p className="w-fit mx-auto text-xl text-gray-400">等待 Agent 运行</p>
               </div>
             )}
           </div>

@@ -14,7 +14,7 @@ type DateMode = "all" | "year" | "month" | "day";
 type StatusFilter = "all" | TaskType["status"];
 type PriorityFilter = "all" | TaskType["priority"];
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 const dateFormat: Record<Exclude<DateMode, "all">, string> = {
   year: "YYYY",
